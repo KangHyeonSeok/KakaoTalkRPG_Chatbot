@@ -1,12 +1,17 @@
 package com.whyk.chatrpg
 
 import android.Manifest
+import android.content.ComponentName
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
+import android.service.notification.NotificationListenerService.requestRebind
 import androidx.appcompat.app.AppCompatActivity
 import com.gun0912.tedpermission.PermissionListener
 import com.gun0912.tedpermission.TedPermission
 import kotlinx.android.synthetic.main.activity_main.*
+
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,7 +30,10 @@ class MainActivity : AppCompatActivity() {
         TedPermission.with(this).setPermissionListener(listener)
                 .setRationaleMessage("파일 읽고 쓰기 위한 권한")
                 .setDeniedMessage("거부시 파일 작업시 오류")
-                .setPermissions(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                .setPermissions(
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                )
                 .check()
 
 

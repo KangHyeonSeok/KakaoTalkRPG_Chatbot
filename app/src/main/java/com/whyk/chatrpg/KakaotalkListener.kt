@@ -4,12 +4,16 @@ import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.PendingIntent
 import android.app.RemoteInput
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
+import java.util.*
 
 
 @SuppressLint("OverrideAbstract")
@@ -18,11 +22,20 @@ class KakaotalkListener() : NotificationListenerService() {
         var execContext: Context? = null
     }
 
+    override fun onCreate() {
+        super.onCreate()
+
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        Log.d("ChatRPG", "onStartCommand")
+        return START_STICKY
+    }
 
     override fun onNotificationPosted(sbn: StatusBarNotification?) {
         super.onNotificationPosted(sbn)
 
-        Log.d("ChatRPG","onNoti")
+        Log.d("ChatRPG", "onNoti")
 
         if (sbn!!.packageName == "com.kakao.talk") {
             val wExt = Notification.WearableExtender(
@@ -54,7 +67,7 @@ class KakaotalkListener() : NotificationListenerService() {
     ) {
         var room: String? = room
         val isGroupChat: Boolean
-        var _msg: String
+        var _msg: String = msg as String
         if (room == null) {
             room = sender
             isGroupChat = false
@@ -63,7 +76,7 @@ class KakaotalkListener() : NotificationListenerService() {
         }
 
         Log.d("ChatRPG", room + " / " + isGroupChat + " / " + msg)
-        reply("(꽃)", session)
+        reply(makeResponse(_msg), session)
     }
 
     fun reply(value: String?, session: Notification.Action) {
@@ -82,5 +95,27 @@ class KakaotalkListener() : NotificationListenerService() {
             session.actionIntent.send(execContext, 0, sendIntent)
         } catch (e: PendingIntent.CanceledException) {
         }
+    }
+
+    private fun makeResponse(value: String?) : String {
+        if(value?.startsWith(".")!!) {
+            val regex = """.주사위(\s*)(\d*)""".toRegex()
+            val matchResult = regex.find(value)
+            if( matchResult != null ) {
+                val groupValues : List<String> = matchResult.groupValues
+                if( groupValues.count() > 1 ) {
+                    Log.d("ChatRPG", groupValues[1])
+                    val result = groupValues[2].toIntOrNull()
+                    if(result != null && result > 1 && result <= 10000000) {
+                        val random = Random()
+                        val num = random.nextInt(result +1)
+                        return num.toString()
+                    }else
+                        return "주사위 값은 2~10000000 사이만 가능 합니다."
+                }
+            }
+        }else if( value.contains("윤미는"))
+            return "윤미는 예쁘다!!"
+        return ""
     }
 }
