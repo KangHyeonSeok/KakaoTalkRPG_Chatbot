@@ -1,4 +1,4 @@
-package com.whyk.chatrpg
+package com.whyk.kakatotalkchatbot
 
 import android.annotation.SuppressLint
 import android.app.Notification
@@ -10,14 +10,12 @@ import android.os.Bundle
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
-import java.util.*
 
 
 @SuppressLint("OverrideAbstract")
 class KakaotalkListener() : NotificationListenerService() {
     companion object {
         var execContext: Context? = null
-        val RPG : RPGManager = RPGManager()
     }
 
     override fun onCreate() {
@@ -34,6 +32,7 @@ class KakaotalkListener() : NotificationListenerService() {
         super.onNotificationPosted(sbn)
 
         Log.d("ChatRPG", "onNoti")
+        Log.d("ChatRPG", sbn!!.packageName)
 
         if (sbn!!.packageName == "com.kakao.talk") {
             val wExt = Notification.WearableExtender(
@@ -74,7 +73,7 @@ class KakaotalkListener() : NotificationListenerService() {
         }
 
         Log.d("ChatRPG", room + " / " + isGroupChat + " / " + sender + " / " + msg)
-        reply(RPG.Command(sender!!,_msg), session)
+        reply("Test!!", session)
     }
 
     fun reply(value: String?, session: Notification.Action) {
