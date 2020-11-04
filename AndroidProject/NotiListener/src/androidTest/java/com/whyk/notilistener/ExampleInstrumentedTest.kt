@@ -1,4 +1,4 @@
-package com.whyk.kakatotalkchatbot
+package com.whyk.notilistener
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -19,6 +19,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("com.whyk.kakatotalkchatbot.test", appContext.packageName)
+        assertEquals("com.whyk.notilistener.test", appContext.packageName)
     }
 }

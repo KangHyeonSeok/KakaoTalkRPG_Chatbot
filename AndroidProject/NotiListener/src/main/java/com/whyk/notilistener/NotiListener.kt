@@ -1,4 +1,4 @@
-package com.whyk.kakatotalkchatbot
+package com.whyk.notilistener
 
 import android.annotation.SuppressLint
 import android.app.Notification
@@ -13,7 +13,7 @@ import android.util.Log
 
 
 @SuppressLint("OverrideAbstract")
-class KakaotalkListener() : NotificationListenerService() {
+class NotiListener() : NotificationListenerService() {
     companion object {
         var execContext: Context? = null
     }

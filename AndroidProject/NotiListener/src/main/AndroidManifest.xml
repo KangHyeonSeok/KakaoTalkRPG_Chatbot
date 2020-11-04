@@ -1,8 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.whyk.kakatotalkchatbot">
+    package="com.whyk.notilistener">
     <application>
         <service
-            android:name="com.whyk.kakatotalkchatbot.KakaotalkListener"
+            android:name="com.whyk.notilistener.NotiListener"
             android:label="ChatRPG"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
             <intent-filter>
