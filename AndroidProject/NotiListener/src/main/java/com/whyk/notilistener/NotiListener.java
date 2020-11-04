@@ -11,10 +11,18 @@ import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
 
+import com.unity3d.player.UnityPlayer;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
 @SuppressLint("OverrideAbstract")
 public class NotiListener extends NotificationListenerService {
 
-    Context execContext;
+    static Context execContext;
+    static Map<String,Notification.Action> SessionMap = new HashMap<>();
+
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -24,6 +32,7 @@ public class NotiListener extends NotificationListenerService {
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
         super.onNotificationPosted(sbn);
+
         if (sbn.getPackageName().compareTo("com.kakao.talk") == 0 ) {
             Notification.WearableExtender wExt = new Notification.WearableExtender(sbn.getNotification());
             for (Notification.Action act : wExt.getActions()) if (act.getRemoteInputs() != null && act.getRemoteInputs().length > 0) if (act.title.toString()
@@ -52,11 +61,17 @@ public class NotiListener extends NotificationListenerService {
             isGroupChat = true;
         }
 
+        String uuid = UUID.randomUUID().toString();
+        try {
+            UnityPlayer.UnitySendMessage("NotiListener","OnReceive", JsonSerializer.toJson(new ToUnityArguments(uuid, room, isGroupChat, sender, msg.toString())));
+        } catch (Exception e) {
+            Log.e("NotiListener", e.toString());
+            Log.e("NotiListener", "유니티가 실행 중이 아닌듯?");
+        }
         Log.d("NotiListener", room + " / " + isGroupChat + " / " + sender + " / " + msg);
-        reply("Test!!", session);
     }
 
-    void reply(String value, Notification.Action session) {
+    static void reply(String value, Notification.Action session) {
         if (session == null) return;
         Intent sendIntent = new Intent();
         Bundle msg = new Bundle();
@@ -70,6 +85,52 @@ public class NotiListener extends NotificationListenerService {
         try {
             session.actionIntent.send(execContext, 0, sendIntent);
         } catch (PendingIntent.CanceledException e) {
+        }
+    }
+
+    public static void ReplyFromUnity(String json) {
+        Log.e("NotiListener", "ReplyFromUnity == " +json);
+        FromUnityArguments arguments = JsonSerializer.fromJson(json,FromUnityArguments.class);
+
+        if(SessionMap.containsKey(arguments.Uuid)) {
+            Notification.Action session = SessionMap.get(arguments.Uuid);
+            if(session != null )
+                reply(arguments.Msg, session);
+            SessionMap.remove(arguments.Uuid);
+        }
+    }
+
+    class ToUnityArguments {
+        public String Uuid;
+        public String Room;
+        public boolean IsGroupChat;
+        public String Sender;
+        public String Msg;
+
+        public ToUnityArguments() {
+
+        }
+
+        public ToUnityArguments(String uuid, String room, boolean isGroup, String sender, String msg) {
+            Uuid = uuid;
+            Room = room;
+            IsGroupChat = isGroup;
+            Sender = sender;
+            Msg = msg;
+        }
+    }
+
+    class FromUnityArguments {
+        public String Uuid;
+        public String Msg;
+
+        public FromUnityArguments() {
+
+        }
+
+        public FromUnityArguments(String uuid, String msg) {
+            Uuid = uuid;
+            Msg = msg;
         }
     }
 }
