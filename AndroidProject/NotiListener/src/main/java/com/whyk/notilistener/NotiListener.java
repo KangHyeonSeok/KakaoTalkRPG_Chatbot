@@ -75,7 +75,6 @@ public class NotiListener extends NotificationListenerService {
     }
 
     static void reply(String value, Notification.Action session) {
-        Log.e("NotiListener", "3");
         if (session == null) return;
         Intent sendIntent = new Intent();
         Bundle msg = new Bundle();
