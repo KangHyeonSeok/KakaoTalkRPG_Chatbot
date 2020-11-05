@@ -20,8 +20,9 @@ import java.util.UUID;
 @SuppressLint("OverrideAbstract")
 public class NotiListener extends NotificationListenerService {
 
-    static Context execContext;
+    static Context MainContext;
     static Map<String,Notification.Action> SessionMap = new HashMap<>();
+    static String PackageFilter = "com.kakao.talk";
 
 
     @Override
@@ -33,14 +34,14 @@ public class NotiListener extends NotificationListenerService {
     public void onNotificationPosted(StatusBarNotification sbn) {
         super.onNotificationPosted(sbn);
 
-        if (sbn.getPackageName().compareTo("com.kakao.talk") == 0 ) {
+        if (sbn.getPackageName().compareTo(PackageFilter) == 0 ) {
             Notification.WearableExtender wExt = new Notification.WearableExtender(sbn.getNotification());
             for (Notification.Action act : wExt.getActions()) if (act.getRemoteInputs() != null && act.getRemoteInputs().length > 0) if (act.title.toString()
                     .toLowerCase().contains("reply") ||
                     act.title.toString().toLowerCase().contains("Reply") ||
                     act.title.toString().toLowerCase().contains("답장")
             ) {
-                execContext = getApplicationContext();
+                MainContext = getApplicationContext();
                 callResponder(
                         sbn.getNotification().extras.getString(Notification.EXTRA_SUMMARY_TEXT),
                         sbn.getNotification().extras.getString(Notification.EXTRA_TITLE),
@@ -62,16 +63,19 @@ public class NotiListener extends NotificationListenerService {
         }
 
         String uuid = UUID.randomUUID().toString();
+        SessionMap.put(uuid, session);
         try {
             UnityPlayer.UnitySendMessage("NotiListener","OnReceive", JsonSerializer.toJson(new ToUnityArguments(uuid, room, isGroupChat, sender, msg.toString())));
         } catch (Exception e) {
             Log.e("NotiListener", e.toString());
             Log.e("NotiListener", "유니티가 실행 중이 아닌듯?");
+            reply("유니티가 실행중이 아닌것 같슴다!",session);
         }
         Log.d("NotiListener", room + " / " + isGroupChat + " / " + sender + " / " + msg);
     }
 
     static void reply(String value, Notification.Action session) {
+        Log.e("NotiListener", "3");
         if (session == null) return;
         Intent sendIntent = new Intent();
         Bundle msg = new Bundle();
@@ -79,19 +83,16 @@ public class NotiListener extends NotificationListenerService {
         for (RemoteInput inputable : session.getRemoteInputs()) {
             msg.putCharSequence(inputable.getResultKey(), value);
         }
-
         RemoteInput.addResultsToIntent(session.getRemoteInputs(), sendIntent, msg);
 
         try {
-            session.actionIntent.send(execContext, 0, sendIntent);
+            session.actionIntent.send(MainContext, 0, sendIntent);
         } catch (PendingIntent.CanceledException e) {
         }
     }
 
     public static void ReplyFromUnity(String json) {
-        Log.e("NotiListener", "ReplyFromUnity == " +json);
         FromUnityArguments arguments = JsonSerializer.fromJson(json,FromUnityArguments.class);
-
         if(SessionMap.containsKey(arguments.Uuid)) {
             Notification.Action session = SessionMap.get(arguments.Uuid);
             if(session != null )
@@ -100,37 +101,45 @@ public class NotiListener extends NotificationListenerService {
         }
     }
 
-    class ToUnityArguments {
-        public String Uuid;
-        public String Room;
-        public boolean IsGroupChat;
-        public String Sender;
-        public String Msg;
-
-        public ToUnityArguments() {
-
-        }
-
-        public ToUnityArguments(String uuid, String room, boolean isGroup, String sender, String msg) {
-            Uuid = uuid;
-            Room = room;
-            IsGroupChat = isGroup;
-            Sender = sender;
-            Msg = msg;
-        }
+    public static void GoSetting() {
+        UnityPlayer.currentActivity.startActivity(new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"));
     }
 
-    class FromUnityArguments {
-        public String Uuid;
-        public String Msg;
+    public static void SetPackageFilter(String filter) {
+        PackageFilter = filter;
+    }
+}
 
-        public FromUnityArguments() {
+class ToUnityArguments {
+    public String Uuid;
+    public String Room;
+    public boolean IsGroupChat;
+    public String Sender;
+    public String Msg;
 
-        }
+    public ToUnityArguments() {
 
-        public FromUnityArguments(String uuid, String msg) {
-            Uuid = uuid;
-            Msg = msg;
-        }
+    }
+
+    public ToUnityArguments(String uuid, String room, boolean isGroup, String sender, String msg) {
+        Uuid = uuid;
+        Room = room;
+        IsGroupChat = isGroup;
+        Sender = sender;
+        Msg = msg;
+    }
+}
+
+class FromUnityArguments {
+    public String Uuid;
+    public String Msg;
+
+    public FromUnityArguments() {
+
+    }
+
+    public FromUnityArguments(String uuid, String msg) {
+        Uuid = uuid;
+        Msg = msg;
     }
 }
