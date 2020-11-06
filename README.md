@@ -9,3 +9,6 @@
 
 ## 제약사항
 * 먼저 메세지를 보내지는 못함
+
+## 현 상황
+![chat](https://user-images.githubusercontent.com/31717201/98344856-32b68c80-2057-11eb-99d1-490debbab4a5.jpg)
