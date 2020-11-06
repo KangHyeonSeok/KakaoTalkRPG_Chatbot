@@ -2,6 +2,7 @@
 
 ## 필요 사항
 * 안드로이드 단말기
+* https://play.google.com/store/apps/details?id=com.google.android.wearable.app
 
 ## 게임 데이터
 * https://docs.google.com/spreadsheets/d/1k9cSK7iOqHOD1RzzYR0sW8iM0wz14Vk6Z4Jko5LimOQ/
