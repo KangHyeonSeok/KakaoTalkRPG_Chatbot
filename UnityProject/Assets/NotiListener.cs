@@ -1,32 +1,56 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEngine.Events;
+
+[System.Serializable]
+public class NotiEvent : UnityEvent<string,string,string,string>
+{
+}
 
 public class NotiListener : MonoBehaviour
 {
+    private static AndroidJavaClass AndroidListener;
+
+    public NotiEvent OnNoti;
+
     public void OnReceive(string json)
     {
-        Debug.Log(json);
-        StartCoroutine(DelaySend(json));
+        if(string.IsNullOrEmpty(json))
+        {
+            Debug.LogError("NotiListener : Received json is empty");
+            return;
+        }
+
+        ToUnityArguments arguments = JsonUtility.FromJson<ToUnityArguments>(json);
+        if(arguments == null )
+        {
+            Debug.LogError("NotiListener : Json parsing failed with " + json);
+            return;
+        }
+
+        OnNoti?.Invoke(arguments.Uuid, arguments.Msg, arguments.Sender, arguments.Room);
     }
 
-    IEnumerator DelaySend(string json)
+    public void SendMsg(string uuid, string msg)
     {
-        ToUnityArguments arguments = JsonUtility.FromJson<ToUnityArguments>(json);
-        Debug.Log(arguments.Msg);
-        AndroidJavaClass androidJavaClass = new AndroidJavaClass("com.whyk.notilistener.NotiListener");
+        Send(uuid, msg);
+    }
+
+    public static void Send(string uuid, string msg)
+    {
+        if(AndroidListener == null)
+            AndroidListener = new AndroidJavaClass("com.whyk.notilistener.NotiListener");
+
         FromUnityArguments fromUnityArguments = new FromUnityArguments
         {
-            Uuid = arguments.Uuid,
-            Msg = "이거슨 유니티에서 보내는 메세지 임당!"
+            Uuid = uuid,
+            Msg = msg
         };
-        yield return new WaitForSeconds(0.5f);
-        Debug.Log("OnUnity Side : " + JsonUtility.ToJson(fromUnityArguments));
-        androidJavaClass.CallStatic("ReplyFromUnity", JsonUtility.ToJson(fromUnityArguments));
+        AndroidListener.CallStatic("ReplyFromUnity", JsonUtility.ToJson(fromUnityArguments));
     }
 }
 
-class ToUnityArguments
+[System.Serializable]
+public class ToUnityArguments
 {
     public string Uuid;
     public string Room;
@@ -35,7 +59,8 @@ class ToUnityArguments
     public string Msg;
 }
 
-class FromUnityArguments
+[System.Serializable]
+public class FromUnityArguments
 {
     public string Uuid;
     public string Msg;
