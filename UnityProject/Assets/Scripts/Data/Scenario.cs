@@ -7,10 +7,10 @@ public class Scenario
 {
     public string name;
     public string description;
-    public List<Scene> Scenes = new List<Scene>();
-
+    public string placeName;
+    
     public string ToShow()
     {
-        return $"{name} : {description}";
+        return $"{name} : {placeName}\n{description}";
     }
 }
