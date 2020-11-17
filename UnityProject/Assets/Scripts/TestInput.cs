@@ -15,7 +15,8 @@ public class TestInput : MonoBehaviour
 
     public void OnEnd()
     {
-        manager.OnReceive("", Input.text, "", "");
+        manager.OnReceive("", Input.text, "테스터", "");
         Input.text = "";
+        Input.ActivateInputField();
     }
 }

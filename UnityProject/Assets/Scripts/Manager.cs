@@ -9,6 +9,7 @@ public class Manager : MonoBehaviour
 
     public void OnReceive(string uuid, string msg, string sender,string room)
     {
+        Logs.Instance.Bubble($"{sender} : {msg}");
         StringBuilder sb = new StringBuilder("");
         
         if (!msg.StartsWith("."))
@@ -37,6 +38,7 @@ public class Manager : MonoBehaviour
         }
 
         Send(uuid, sb.ToString());
+        Logs.Instance.Bubble($"GM : {sb.ToString()}");
     }
 
 
@@ -47,7 +49,6 @@ public class Manager : MonoBehaviour
 #else
         NotiListener.Send(uuid, msg);
 #endif
-
     }
 
 }
