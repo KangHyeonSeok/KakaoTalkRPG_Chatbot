@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
-public class Scenario
+public class Scenario : iData
 {
     public string name;
     public string description;
@@ -11,6 +11,6 @@ public class Scenario
     
     public string ToShow()
     {
-        return $"{name} : {placeName}\n{description}";
+        return $".{name} : {placeName}\n{description}";
     }
 }

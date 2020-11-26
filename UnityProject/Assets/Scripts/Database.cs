@@ -2,6 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 public class Database : ScriptableObject
 {
@@ -33,9 +36,18 @@ public class Database : ScriptableObject
         }
     }
 
+#if UNITY_EDITOR
+    [MenuItem("Database/DataDownload")]
+    static void Download()
+    {
+        Instance.DataDownload();
+    }
+#endif
+
     public void DataDownload()
     {
         SpreadsheetManager.ReadPublicSpreadsheet(new GSTU_Search(SheetID, "Scenario", "A1", "Z1000"), (x) => OnReceiveScenario(x));
+        SpreadsheetManager.ReadPublicSpreadsheet(new GSTU_Search(SheetID, "Job", "A1", "Z1000"), (x) => OnReceiveJob(x));
         //Scene
         //Place
         //Job
@@ -62,4 +74,16 @@ public class Database : ScriptableObject
             Debug.Log(scenario.ToShow());
         }
     }
+
+    void OnReceiveJob(GstuSpreadSheet ss)
+    {
+        Jobs.Clear();
+
+        var rows = ss.columns["A"];
+        rows.RemoveAt(0);
+
+        foreach (var p in rows)
+            Jobs.Add(new Job(ss, p.value));
+    }
+    
 }
